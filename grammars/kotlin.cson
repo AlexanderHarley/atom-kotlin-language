@@ -52,6 +52,43 @@
         }
       ]
 
+    annotations: {
+      patterns: [
+        {
+          match: "@(?:file|property|field|get|set|receiver|param|setparam|delegate)\\s*:\\s*?[a-zA-Z_]\\w*",
+          name: "meta.annotation.kotlin"
+        },
+        {
+          begin: "@[a-zA-Z_]\\w*\\s*(\\()",
+          beginCaptures: {
+            1: {
+              name: "punctuation.definition.arguments.begin.kotlin"
+            }
+          },
+          end: "\\)",
+          endCaptures: {
+            0: {
+              name: "punctuation.definition.arguments.end.kotlin"
+            }
+          },
+          name: "meta.annotation.kotlin",
+          patterns: [
+            {
+              include: "#statements"
+            },
+            {
+              match: ",",
+              name: "punctuation.seperator.property.kotlin"
+            }
+          ]
+        },
+        {
+          match: "@[a-zA-Z_]\\w*",
+          name: "meta.annotation.kotlin"
+        }
+      ]
+    },
+
     comments:
       patterns: [
         {
@@ -104,85 +141,115 @@
     types:
       patterns: [
         {
-          match: "\\b(Any|Unit|String|Int|Boolean|Char|Long|Double|Float|Short|Byte|dynamic)\\b"
-          name: "storage.type.buildin.kotlin"
-        }
+          include: "#built-in-types"
+        },
         {
-          match: "\\b(IntArray|BooleanArray|CharArray|LongArray|DoubleArray|FloatArray|ShortArray|ByteArray)\\b"
-          name: "storage.type.buildin.array.kotlin"
-        }
+          include: "#class-ident"
+        },
         {
-          begin: "\\b(Array|List|Map)<\\b"
-          beginCaptures:
-            1:
-              name: "storage.type.buildin.collection.kotlin"
-
-          end: ">"
+          include: "#generic"
+        },
+        {
+          match: "(?<![/=\\-+!*%<>&|\\^~.])(->)(?![/=\\-+!*%<>&|\\^~.])",
+          captures: {
+            1: {
+              name: "keyword.operator.type.function.kotlin"
+            }
+          }
+        },
+        {
+          match: "\\?(?!\\.)",
+          name: "keyword.operator.type.nullable.kotlin"
+        },
+        {
+          begin: "\\(",
+          beginCaptures: {
+            0: {
+              name: "punctuation.section.group.begin.kotlin"
+            }
+          },
+          end: "\\)",
+          endCaptures: {
+            0: {
+              name: "punctuation.section.group.end.kotlin"
+            }
+          },
           patterns: [
             {
               include: "#types"
             }
-            {
-              include: "#keywords"
-            }
           ]
         }
-        {
-          begin: "\\w+<"
-          end: ">"
+      ],
+      repository: {
+        "built-in-types": {
           patterns: [
             {
-              include: "#types"
-            }
+              match: "\\b(Nothing|Any|Unit|String|CharSequence|Int|Boolean|Char|Long|Double|Float|Short|Byte|UByte|UShort|UInt|ULong|Array|List|Map|Set|dynamic)\\b(\\?)?",
+              name: "support.class.kotlin"
+            },
             {
-              include: "#keywords"
+              match: "\\b(IntArray|BooleanArray|CharArray|LongArray|DoubleArray|FloatArray|ShortArray|ByteArray|UByteArray|UShortArray|UIntArray|ULongArray)\\b(\\?)?",
+              name: "storage.type.buildin.array.kotlin"
             }
           ]
         }
-        {
-          begin: "(#)\\("
-          beginCaptures:
-            1:
-              name: "keyword.operator.tuple.kotlin"
+      }
 
-          end: "\\)"
-          patterns: [include: "#expressions"]
-        }
-        {
-          begin: "\\{"
-          end: "\\}"
-          patterns: [include: "#statements"]
-        }
-        {
-          begin: "\\("
-          end: "\\)"
-          patterns: [include: "#types"]
-        }
-        {
-          match: "(->)"
-          name: "keyword.operator.declaration.kotlin"
-        }
-      ]
-
-    generics:
+    generics: {
       patterns: [
         {
-          begin: "(:)"
-          beginCaptures:
-            1:
-              name: "keyword.operator.declaration.kotlin"
-
-          end: "(?=,|>)"
-          patterns: [include: "#types"]
+          begin: "(?=\\<(?:[A-Z_]|\\*|in|out))",
+          end: "(?<=\\>)(?!\\>)",
+          patterns: [
+            {
+              match: "<",
+              name: "punctuation.bracket.angle.begin.kotlin"
+            },
+            {
+              match: ">",
+              name: "punctuation.bracket.angle.end.kotlin"
+            },
+            {
+              match: "\\*",
+              name: "entity.name.type.generic.wildcard.kotlin"
+            },
+            {
+              include: "#generic-parameter-list"
+            },
+            {
+              match: ",",
+              name: "punctuation.seperator.kotlin"
+            }
+          ]
         }
-        {
-          include: "#keywords"
+      ],
+      repository: {
+        "generic-parameter-list": {
+          patterns: [
+            {
+              include: "#annotations"
+            },
+            {
+              match: "\\b(in|out)\\b",
+              name: "storage.modifier.generic.variance.kotlin"
+            },
+            {
+              include: "#built-in-types"
+            },
+            {
+              include: "#class-ident"
+            },
+            {
+              include: "#generics"
+            },
+            {
+              include: "#operators"
+            }
+          ]
         }
-        {
-          match: "\\w+"
-          name: "storage.type.generic.kotlin"
-        }
-      ]
+      }
+    }
 
     typedefs:
       begin: "(?=\\s*(?:type))"
@@ -261,6 +328,16 @@
           patterns: [include: "#statements"]
         }
       ]
+
+    "class-ident": {
+      patterns: [
+        {
+          match: "\\b[A-Z_]\\w*\\b",
+          name: "entity.name.type.class.kotlin",
+          comment: "Classes generally start with an Uppercase Char"
+        }
+      ]
+    },
 
     variables:
       begin: "(?=\\s*(?:var|val))"
@@ -567,6 +644,51 @@
           name: "string.quoted.single.kotlin"
         }
       ]
+
+    operators: {
+      patterns: [
+        {
+          match: "\\b(and|or|not|inv)\\b",
+          name: "keyword.operator.bitwise.kotlin"
+        },
+        {
+          match: "(==|!=|===|!==|<=|>=|<|>)",
+          name: "keyword.operator.comparison.kotlin"
+        },
+        {
+          match: "(=)",
+          name: "keyword.operator.assignment.kotlin"
+        },
+        {
+          match: "(:(?!:))",
+          name: "keyword.operator.declaration.kotlin"
+        },
+        {
+          match: "(\\?:)",
+          name: "keyword.operator.elvis.kotlin"
+        },
+        {
+          match: "(\\-\\-|\\+\\+)",
+          name: "keyword.operator.increment-decrement.kotlin"
+        },
+        {
+          match: "(\\-|\\+|\\*|\\/|%)",
+          name: "keyword.operator.arithmetic.kotlin"
+        },
+        {
+          match: "(\\+\\=|\\-\\=|\\*\\=|\\/\\=)",
+          name: "keyword.operator.arithmetic.assign.kotlin"
+        },
+        {
+          match: "(\\!|\\&\\&|\\|\\|)",
+          name: "keyword.operator.logical.kotlin"
+        },
+        {
+          match: "(\\.\\.)",
+          name: "keyword.operator.range.kotlin"
+        }
+      ]
+    },
 
     constants:
       patterns: [
