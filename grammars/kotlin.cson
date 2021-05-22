@@ -211,6 +211,9 @@
           beginCaptures:
             1:
               name: "keyword.other.kotlin"
+            2:
+              name: "keyword.other.kotlin"
+
           end: "(?=<|{|\\(|:)"
           patterns: [
             {
@@ -568,23 +571,63 @@
     constants:
       patterns: [
         {
-          match: "\\b(true|false|null|this|super)\\b"
-          name: "constant.language.kotlin"
+          match: "\\b(true|false)\\b"
+          name: "constant.language.boolean.kotlin"
         }
         {
-          match: "\\b((0(x|X)[0-9a-fA-F]*)|(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))((e|E)(\\+|-)?[0-9]+)?)([LlFfUuDd]|UL|ul)?\\b"
-          name: "constant.numeric.kotlin"
+          match: "\\b(0(x|X)[0-9A-Fa-f_]*)([LuU]|[uU]L)?\\b"
+          name: "constant.numeric.hex.kotlin"
         }
         {
-          match: "\\b([A-Z][A-Z0-9_]+)\\b"
-          name: "constant.other.kotlin"
+          match: "\\b(0(b|B)[0-1_]*)([LuU]|[uU]L)?\\b"
+          name: "constant.numeric.binary.kotlin"
+        }
+        {
+          match: "\\b([0-9][0-9_]*\\.[0-9][0-9_]*[fFL]?)\\b"
+          name: "constant.numeric.float.kotlin"
+        }
+        {
+          match: "\\b([0-9][0-9_]*([fFLuU]|[uU]L)?)\\b"
+          name: "constant.numeric.integer.kotlin"
+        }
+        {
+          match: "\\b(null)\\b"
+          name: "constant.language.null.kotlin"
         }
       ]
 
     keywords:
       patterns: [
         {
-          match: "\\b(var|val|public|private|protected|abstract|final|enum|open|attribute|annotation|override|inline|var|val|vararg|lazy|in|out|internal|data|tailrec|operator|infix|const|yield|typealias|typeof)\\b"
+          match: "(\\!in|\\!is|as\\?)\\b"
+          name: "keyword.operator.kotlin"
+        }
+        {
+          match: "\\b(in|is|as|assert)\\b"
+          name: "keyword.operator.kotlin"
+        }
+        {
+          match: "\\b(const)\\b"
+          name: "storage.modifier.kotlin"
+        }
+        {
+          match: "\\b(val|var)\\b"
+          name: "storage.type.kotlin"
+        }
+        {
+          match: "\\b(\_)\\b"
+          name: "punctuation.definition.variable.kotlin"
+        }
+        {
+          match: "\\b(data|inline|tailrec|operator|infix|typealias|reified)\\b"
+          name: "storage.type.kotlin"
+        }
+        {
+          match: "\\b(external|public|private|protected|internal|abstract|final|sealed|enum|open|annotation|override|vararg|typealias|expect|actual|yield|out|in|lateinit)\\b"
+          name: "storage.modifier.kotlin"
+        }
+        {
+          match: "\\b(suspend(?!\\s*[\\(]?\\s*\\{))\\b"
           name: "storage.modifier.kotlin"
         }
         {
@@ -592,52 +635,28 @@
           name: "keyword.control.catch-exception.kotlin"
         }
         {
-          match: "\\b(if|else|while|for|do|return|when|where|break|continue)\\b"
+          match: "\\b(if|else|when)\\b"
+          name: "keyword.control.conditional.kotlin"
+        }
+        {
+          match: "\\b(while|for|do|return|break|continue)\\b"
           name: "keyword.control.kotlin"
         }
         {
-          match: "\\b(in|is|as|assert)\\b"
-          name: "keyword.operator.kotlin"
+          match: "\\b(constructor|init)\\b"
+          name: "entity.name.function.constructor"
         }
         {
-          match: "(==|!=|===|!==|<=|>=|<|>)"
-          name: "keyword.operator.comparison.kotlin"
+          match: "\\b(companion|object)\\b"
+          name: "storage.type.kotlin"
         }
         {
-          match: "(=)"
-          name: "keyword.operator.assignment.kotlin"
+          match: "\\b(class)\\b"
+          name: "constant.language.kotlin"
         }
         {
-          match: "(:)"
-          name: "keyword.operator.declaration.kotlin"
-        }
-        {
-          match: "(\\.)"
-          name: "keyword.operator.dot.kotlin"
-        }
-        {
-          match: "(\\-\\-|\\+\\+)"
-          name: "keyword.operator.increment-decrement.kotlin"
-        }
-        {
-          match: "(\\+=|\\-=|\\*=|\\/=)"
-          name: "keyword.operator.arithmetic.assign.kotlin"
-        }
-        {
-          match: "(\\.\\.)"
-          name: "keyword.operator.range.kotlin"
-        }
-        {
-          match: "(\\-|\\+|\\*|\\/|%)"
-          name: "keyword.operator.arithmetic.kotlin"
-        }
-        {
-          match: "(!|&&|\\|\\|)"
-          name: "keyword.operator.logical.kotlin"
-        }
-        {
-          match: "(;)"
-          name: "punctuation.terminator.kotlin"
+          match: "\\b(this|super)\\b"
+          name: "variable.language.kotlin"
         }
       ]
 }
