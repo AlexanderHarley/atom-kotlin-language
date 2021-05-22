@@ -31,22 +31,25 @@
       patterns: [
         {
           include: "#namespaces"
-        }
+        },
         {
           include: "#typedefs"
-        }
+        },
         {
           include: "#classes"
-        }
+        },
         {
-          include: "#functions"
-        }
+          include: "#builtin-functions"
+        },
+        {
+          include: "#literal-functions"
+        },
         {
           include: "#variables"
-        }
+        },
         {
           include: "#getters-and-setters"
-        }
+        },
         {
           include: "#expressions"
         }
@@ -147,7 +150,7 @@
           include: "#class-ident"
         },
         {
-          include: "#generic"
+          include: "#generics"
         },
         {
           match: "(?<![/=\\-+!*%<>&|\\^~.])(->)(?![/=\\-+!*%<>&|\\^~.])",
@@ -195,6 +198,178 @@
           ]
         }
       }
+
+    "builtin-functions": {
+      patterns: [
+        {
+          match: "\\b(apply|also|let|run|takeIf|takeWhile|takeUnless|with|print|println)\\b\\s*(?={|\\()",
+          captures: {
+            1: {
+              name: "support.function.kotlin"
+            }
+          }
+        },
+        {
+          match: "\\b(arrayListOf|mutableListOf|listOf|mutableMapOf|mapOf|mutableSetOf|setOf)\\b\\s*(?={|\\()",
+          captures: {
+            1: {
+              name: "support.function.kotlin"
+            }
+          }
+        }
+      ]
+    },
+    "literal-functions": {
+      patterns: [
+        {
+          begin: "(?=\\b(?:fun)\\b)",
+          end: "(?<=$|=|\\})",
+          name: "meta.function.kotlin",
+          patterns: [
+            {
+              include: "#keywords"
+            },
+            {
+              begin: "\\bfun\\b",
+              beginCaptures: {
+                0: {
+                  name: "keyword.other.kotlin"
+                }
+              },
+              end: "(?=\\()",
+              patterns: [
+                {
+                  include: "#generic"
+                },
+                {
+                  match: "(`[^`]*`)",
+                  comment: "Backtick quoted function names",
+                  captures: {
+                    0: {
+                      name: "entity.name.function.kotlin"
+                    },
+                    1: {
+                      name: "string.quoted.backtick.kotlin"
+                    }
+                  }
+                },
+                {
+                  match: "([\\.<\\?>\\w]+\\.)?(\\w+)",
+                  captures: {
+                    2: {
+                      name: "entity.name.function.kotlin"
+                    }
+                  }
+                },
+                {
+                  include: "#types"
+                }
+              ]
+            },
+            {
+              begin: "(\\()",
+              beginCaptures: {
+                0: {
+                  name: "punctuation.section.group.begin.kotlin"
+                },
+                1: {
+                  name: "punctuation.definition.parameters.begin.kotlin"
+                }
+              },
+              end: "(\\))",
+              endCaptures: {
+                0: {
+                  name: "punctuation.section.group.end.kotlin"
+                },
+                1: {
+                  name: "punctuation.definition.parameters.end.kotlin"
+                }
+              },
+              name: "meta.parameters.kotlin",
+              patterns: [
+                {
+                  include: "#function-parameter-list"
+                }
+              ]
+            },
+            {
+              match: "=",
+              name: "keyword.operator.single-expression.kotlin"
+            },
+            {
+              begin: "\\{",
+              beginCaptures: {
+                0: {
+                  name: "punctuation.section.group.begin.kotlin"
+                }
+              },
+              end: "\\}",
+              endCaptures: {
+                0: {
+                  name: "punctuation.section.group.end.kotlin"
+                }
+              },
+              name: "meta.block.kotlin",
+              patterns: [
+                {
+                  include: "#statements"
+                }
+              ]
+            },
+            {
+              include: "#return-type"
+            }
+          ]
+        }
+      ],
+      repository: {
+        "function-parameter-list": {
+          patterns: [
+            {
+              "include": "#comments"
+            },
+            {
+              "include": "#annotations"
+            },
+            {
+              "include": "#keywords"
+            },
+            {
+              match: "(\\w+)\\s*(:)",
+              captures: {
+                1: {
+                  name: "variable.parameter.function.kotlin"
+                },
+                2: {
+                  name: "keyword.operator.declaration.kotlin"
+                }
+              }
+            },
+            {
+              match: ",",
+              name: "punctuation.seperator.kotlin"
+            },
+            {
+              include: "#types"
+            }
+          ]
+        },
+        "return-type": {
+          patterns: [
+            {
+              name: "meta.return.type.kotlin",
+              begin: "(?<=\\))\\s*(:)(?=\\s*\\S)",
+              end: "(?<![:|&])(?=$|^|[={};,]|//)",
+              patterns: [
+                {
+                  include: "#types"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
 
     generics: {
       patterns: [
@@ -453,62 +628,6 @@
               patterns: [include: "#expressions"]
             }
           ]
-        }
-      ]
-
-    functions:
-      begin: "(?=\\s*(?:fun))"
-      end: "}|(?=$)"
-      patterns: [
-        {
-          begin: "\\b(fun)\\b"
-          beginCaptures:
-            1:
-              name: "keyword.other.kotlin"
-
-          end: "(?=\\()"
-          patterns: [
-            {
-              begin: "<"
-              end: ">"
-              patterns: [include: "#generics"]
-            }
-            {
-              captures:
-                2:
-                  name: "entity.name.function.kotlin"
-
-              match: "([\\.<\\?>\\w]+\\.)?(\\w+)"
-            }
-          ]
-        }
-        {
-          begin: "\\("
-          end: "\\)"
-          patterns: [include: "#parameters"]
-        }
-        {
-          begin: "(:)"
-          beginCaptures:
-            1:
-              name: "keyword.operator.declaration.kotlin"
-
-          end: "(?={|=|$)"
-          patterns: [include: "#types"]
-        }
-        {
-          begin: "\\{"
-          end: "(?=\\})"
-          patterns: [include: "#statements"]
-        }
-        {
-          begin: "(=)"
-          beginCaptures:
-            1:
-              name: "keyword.operator.assignment.kotlin"
-
-          end: "(?=$)"
-          patterns: [include: "#expressions"]
         }
       ]
 
